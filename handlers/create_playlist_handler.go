@@ -7,11 +7,12 @@ import (
 	"net/http"
 )
 
-type CreatePlaylistHandler struct{}
+type CreatePlaylistHandler struct{
+	HTTPClient *http.Client
+}
 
 func (h CreatePlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	if err := req.ParseForm(); err != nil {
-	}
+	if err := req.ParseForm(); err != nil {}
 
 	playlistName := req.Form.Get("name")
 
@@ -24,7 +25,5 @@ func (h CreatePlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Reques
 	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("https://api.spotify.com/v1/users/%s/playlists", USER_ID), bytes.NewBuffer([]byte(jsonString)))
 	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", AUTHORIZATION_TOKEN))
 
-	client := &http.Client{}
-
-	client.Do(request)
+	h.HTTPClient.Do(request)
 }
