@@ -2,6 +2,7 @@ package handlers
 
 import (
 	. "Spotify/constants"
+	"Spotify/models"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -12,11 +13,6 @@ import (
 
 type CreatePlaylistHandler struct{
 	HTTPClient *http.Client
-}
-
-// TODO - move out into models directory
-type Playlist struct {
-	ID string `json:"id"`
 }
 
 func (h CreatePlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -39,7 +35,7 @@ func (h CreatePlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Reques
 
 	spotifyBodyBytes, _ := ioutil.ReadAll(spotifyResponse.Body)
 
-	playlist := new(Playlist)
+	playlist := new(models.Playlist)
 	json.Unmarshal(spotifyBodyBytes, &playlist)
 
 	data, _ := json.Marshal(playlist)

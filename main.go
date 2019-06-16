@@ -20,7 +20,6 @@ func main() {
 		HTTPClient: client,
 	}
 
-	// TODO - change this to be more restful i.e POST /playlist
 	router.NewRoute().Path("/users/{user_id}/playlists").Handler(createPlaylistHandler)
 	router.NewRoute().Path("/search").Handler(searchHandler)
 

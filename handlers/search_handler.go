@@ -2,6 +2,7 @@ package handlers
 
 import (
 	. "Spotify/constants"
+	"Spotify/models"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -14,25 +15,19 @@ type SearchHandler struct {
 }
 
 type SpotifyResponse struct {
-	Tracks Track `json:"tracks"`
+	Tracks TrackItems `json:"tracks"`
 }
 
-type Track struct {
-	Items []TrackItem `json:"items"`
-}
-
-type TrackItem struct {
-	URL string `json:"uri"`
-	TrackName string `json:"trackName"`
-	ArtistName string `json:"artistName"`
+type TrackItems struct {
+	Items []models.Track `json:"items"`
 }
 
 func (h SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	inputBodyBytes, _ := ioutil.ReadAll(req.Body)
-	trackItem := new(TrackItem)
-	json.Unmarshal(inputBodyBytes, &trackItem)
+	track := new(models.Track)
+	json.Unmarshal(inputBodyBytes, &track)
 
-	spotifyRequestURL := buildURL(trackItem)
+	spotifyRequestURL := buildURL(track)
 
 	spotifyRequest, _ := http.NewRequest(http.MethodGet, spotifyRequestURL, nil)
 	spotifyRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", AUTHORIZATION_TOKEN))
@@ -43,18 +38,18 @@ func (h SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	spotifyResponseBody := new(SpotifyResponse)
 	json.Unmarshal(spotifyBodyBytes, &spotifyResponseBody)
 
-	trackItem.URL = spotifyResponseBody.Tracks.Items[0].URL
+	track.URL = spotifyResponseBody.Tracks.Items[0].URL
 
-	data, _ := json.Marshal(trackItem)
+	data, _ := json.Marshal(track)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)
 }
 
-func buildURL(trackItem *TrackItem) string {
+func buildURL(track *models.Track) string {
 	baseUrl, _ := url.Parse("https://api.spotify.com/v1/search")
 	params := url.Values{}
-	params.Add("q", fmt.Sprintf("track:%s", trackItem.TrackName))
-	params.Add("q", fmt.Sprintf("artist:%s", trackItem.ArtistName))
+	params.Add("q", fmt.Sprintf("track:%s", track.TrackName))
+	params.Add("q", fmt.Sprintf("artist:%s", track.ArtistName))
 	params.Add("limit", "1")
 	params.Add("type", "track")
 	baseUrl.RawQuery = params.Encode()
