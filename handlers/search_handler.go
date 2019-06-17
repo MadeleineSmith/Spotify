@@ -27,7 +27,7 @@ func (h SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	track := new(models.Track)
 	json.Unmarshal(inputBodyBytes, &track)
 
-	spotifyRequestURL := buildURL(track)
+	spotifyRequestURL := h.buildURL(track)
 
 	spotifyRequest, _ := http.NewRequest(http.MethodGet, spotifyRequestURL, nil)
 	spotifyRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", AUTHORIZATION_TOKEN))
@@ -38,21 +38,21 @@ func (h SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	spotifyResponseBody := new(SpotifyResponse)
 	json.Unmarshal(spotifyBodyBytes, &spotifyResponseBody)
 
-	track.URL = spotifyResponseBody.Tracks.Items[0].URL
+	track.URI = spotifyResponseBody.Tracks.Items[0].URI
 
 	data, _ := json.Marshal(track)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)
 }
 
-func buildURL(track *models.Track) string {
-	baseUrl, _ := url.Parse("https://api.spotify.com/v1/search")
+func (h SearchHandler) buildURL(track *models.Track) string {
+	baseURL, _ := url.Parse("https://api.spotify.com/v1/search")
 	params := url.Values{}
 	params.Add("q", fmt.Sprintf("track:%s", track.TrackName))
 	params.Add("q", fmt.Sprintf("artist:%s", track.ArtistName))
 	params.Add("limit", "1")
 	params.Add("type", "track")
-	baseUrl.RawQuery = params.Encode()
+	baseURL.RawQuery = params.Encode()
 
-	return baseUrl.String()
+	return baseURL.String()
 }
