@@ -12,6 +12,8 @@ func main() {
 
 	client := &http.Client{}
 
+	scrapeChartsHandler := handlers.ScrapeChartsHandler{}
+
 	// TODO - check with Tom about base class with `client` property?
 	createPlaylistHandler := handlers.CreatePlaylistHandler{
 		HTTPClient: client,
@@ -24,6 +26,7 @@ func main() {
 	}
 
 	router.NewRoute().Path("/users/{user_id}/playlists").Handler(createPlaylistHandler)
+	router.NewRoute().Path("/charts/{chart_date}").Handler(scrapeChartsHandler)
 	router.NewRoute().Path("/search").Handler(searchHandler)
 	router.NewRoute().Path("/playlists/{playlist_id}/tracks").Handler(addToPlaylistHandler)
 
