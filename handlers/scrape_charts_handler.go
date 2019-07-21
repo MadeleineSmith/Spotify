@@ -28,7 +28,6 @@ func (h ScrapeChartsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 
 			// feels slightly hacky... but hey
 			if title != "" && artist != "" {
-			fmt.Printf("%s - %s \n", title, artist)
 				tracks = append(tracks, models.Track{
 					TrackName: title,
 					ArtistName: artist,

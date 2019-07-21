@@ -24,23 +24,16 @@ type TrackItems struct {
 
 func (h SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	inputBodyBytes, _ := ioutil.ReadAll(req.Body)
-	track := new(models.Track)
-	json.Unmarshal(inputBodyBytes, &track)
 
-	spotifyRequestURL := h.buildURL(track)
+	var inputTrackData []*models.Track
+	json.Unmarshal(inputBodyBytes, &inputTrackData)
 
-	spotifyRequest, _ := http.NewRequest(http.MethodGet, spotifyRequestURL, nil)
-	spotifyRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", AUTHORIZATION_TOKEN))
+	for _, track := range inputTrackData {
+		spotifyRequestURL := h.buildURL(track)
+		h.makeSpotifySearchRequest(spotifyRequestURL, track)
+	}
 
-	spotifyResponse, _ := h.HTTPClient.Do(spotifyRequest)
-
-	spotifyBodyBytes, _ := ioutil.ReadAll(spotifyResponse.Body)
-	spotifyResponseBody := new(SpotifyResponse)
-	json.Unmarshal(spotifyBodyBytes, &spotifyResponseBody)
-
-	track.URI = spotifyResponseBody.Tracks.Items[0].URI
-
-	data, _ := json.Marshal(track)
+	data, _ := json.Marshal(inputTrackData)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)
 }
@@ -55,4 +48,20 @@ func (h SearchHandler) buildURL(track *models.Track) string {
 	baseURL.RawQuery = params.Encode()
 
 	return baseURL.String()
+}
+
+func (h SearchHandler) makeSpotifySearchRequest(url string, track *models.Track) {
+	spotifyRequest, _ := http.NewRequest(http.MethodGet, url, nil)
+	spotifyRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", AUTHORIZATION_TOKEN))
+
+	spotifyResponse, _ := h.HTTPClient.Do(spotifyRequest)
+
+	spotifyBodyBytes, _ := ioutil.ReadAll(spotifyResponse.Body)
+	spotifyResponseBody := new(SpotifyResponse)
+	json.Unmarshal(spotifyBodyBytes, &spotifyResponseBody)
+
+	// TODO - do I want to remove this track from the JSON I return?
+	if len(spotifyResponseBody.Tracks.Items) == 1 {
+		track.URI = spotifyResponseBody.Tracks.Items[0].URI
+	}
 }
