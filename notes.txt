@@ -1,0 +1,7 @@
+TODO
+======================================
+* Fails with IT'S NOT THE END OF THE WORLD BUT I CAN by LOSTPROPHETS - do I want to return this track in the JSON or not
+* Improve finding of songs - some of the results are a bit weird
+* Make it more async - the /search request is taking 3 seconds...
+* Change buildURL method in search_handler to be JSON instead of building up query params
+* Find a way of doing this once: 	spotifyRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", AUTHORIZATION_TOKEN))

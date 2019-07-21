@@ -3,16 +3,20 @@ package handlers
 import (
 	. "Spotify/constants"
 	"Spotify/models"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 )
 
 type AddToPlaylistHandler struct {
 	HTTPClient *http.Client
+}
+
+type SpotifyAddToPlaylistRequest struct {
+	URIs []string `json:"uris"`
 }
 
 func (h AddToPlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -20,23 +24,26 @@ func (h AddToPlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Request
 	playlistID := vars["playlist_id"]
 
 	inputBodyBytes, _ := ioutil.ReadAll(req.Body)
-	track := new(models.Track)
-	json.Unmarshal(inputBodyBytes, &track)
+	var inputTrackData []*models.Track
+	json.Unmarshal(inputBodyBytes, &inputTrackData)
 
-	spotifyRequestURL := h.buildURL(playlistID, track)
-	spotifyRequest, _ := http.NewRequest(http.MethodPost, spotifyRequestURL, nil)
+	var spotifyURIs []string
+	for _, track := range inputTrackData {
+		if track.URI != "" {
+			spotifyURIs = append(spotifyURIs, track.URI)
+		}
+	}
+
+	spotifyTrackRequest := SpotifyAddToPlaylistRequest{
+		URIs: spotifyURIs,
+	}
+
+	data, _ := json.Marshal(spotifyTrackRequest)
+
+	spotifyRequestURL := fmt.Sprintf("https://api.spotify.com/v1/playlists/%s/tracks", playlistID)
+
+	spotifyRequest, _ := http.NewRequest(http.MethodPost, spotifyRequestURL, bytes.NewBuffer(data))
+
 	spotifyRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", AUTHORIZATION_TOKEN))
-
 	h.HTTPClient.Do(spotifyRequest)
-}
-
-// TODO - consider changing to JSON body for track URIs instead of query parameters
-func (h AddToPlaylistHandler) buildURL(playlistID string, track *models.Track) string {
-	baseURL, _ := url.Parse(fmt.Sprintf("https://api.spotify.com/v1/playlists/%s/tracks", playlistID))
-	params := url.Values{}
-	params.Add("uris", track.URI)
-
-	baseURL.RawQuery = params.Encode()
-
-	return baseURL.String()
 }
