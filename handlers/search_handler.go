@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type SearchHandler struct {
@@ -39,10 +40,15 @@ func (h SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h SearchHandler) buildURL(track *models.Track) string {
+	artistWithoutFt := strings.Replace(track.ArtistName, " FT ", " ", -10)
+
 	baseURL, _ := url.Parse("https://api.spotify.com/v1/search")
 	params := url.Values{}
-	params.Add("q", fmt.Sprintf("track:%s", track.TrackName))
-	params.Add("q", fmt.Sprintf("artist:%s", track.ArtistName))
+
+	query := strings.ToLower(fmt.Sprintf("%s %s", track.TrackName, artistWithoutFt))
+
+	params.Add("q", query)
+
 	params.Add("limit", "1")
 	params.Add("type", "track")
 	baseURL.RawQuery = params.Encode()
