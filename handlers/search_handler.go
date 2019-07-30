@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 )
 
@@ -40,14 +41,45 @@ func (h SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h SearchHandler) buildURL(track *models.Track) string {
-	artistWithoutFt := strings.Replace(track.ArtistName, " FT ", " ", -10)
+	lowerCaseArtist := strings.ToLower(track.ArtistName)
+	lowerCaseTrackName := strings.ToLower(track.TrackName)
+
+	artistReplacer := strings.NewReplacer(
+		" ft ", " ",
+		"/", " ",
+		"&", " ",
+		"chipmunk", "chip", // ok
+		"will i am", "will.i.am", // ok
+		"lily rose cooper", "lily allen", // ok
+		)
+
+	// Official Charts corrections
+	trackReplacer := strings.NewReplacer(
+		"you got the love", "you've got the love",
+		"sos (let the music play)", "s.o.s. (let the music play)",
+		"she's got me dancin", "she's got me dancing",
+		"just the way you are (amazing)", "just the way you are", // ok
+	)
+
+	artistWithReplacements := artistReplacer.Replace(lowerCaseArtist)
+	trackWithReplacements := trackReplacer.Replace(lowerCaseTrackName)
+
+	// doing two separate regular expressions as golang does not allow negative lookaheads
+	pinkFloydRe := regexp.MustCompile(`pink floyd`)
+	pinkRe := regexp.MustCompile(`pink`)
+
+	if pinkRe.MatchString(artistWithReplacements) && !pinkFloydRe.MatchString(artistWithReplacements) {
+		artistWithReplacements = pinkRe.ReplaceAllString(artistWithReplacements, `p!nk`)
+	}
+
+	re := regexp.MustCompile(`^et$`)
+	trackWithReplacements = re.ReplaceAllString(trackWithReplacements, `e.t.`)
 
 	baseURL, _ := url.Parse("https://api.spotify.com/v1/search")
 	params := url.Values{}
 
-	query := strings.ToLower(fmt.Sprintf("%s %s", track.TrackName, artistWithoutFt))
-
-	params.Add("q", query)
+	massiveString := fmt.Sprintf("%s artist:%s", trackWithReplacements, artistWithReplacements)
+	params.Add("q", massiveString)
 
 	params.Add("limit", "1")
 	params.Add("type", "track")
