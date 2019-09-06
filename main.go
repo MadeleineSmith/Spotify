@@ -13,6 +13,13 @@ func main() {
 
 	client := &http.Client{}
 
+	loginUserHandler := handlers.LoginUserHandler{
+		HTTPClient: client,
+	}
+	callbackHandler := handlers.CallbackHandler{
+		HTTPClient: client,
+	}
+
 	scrapeChartsHandler := handlers.ScrapeChartsHandler{}
 
 	// TODO - check with Tom about base class with `client` property?
@@ -26,12 +33,14 @@ func main() {
 		HTTPClient: client,
 	}
 
+	router.NewRoute().Path("/login").Handler(loginUserHandler)
+	router.NewRoute().Path("/callback").Handler(callbackHandler)
+
 	router.NewRoute().Path("/users/{user_id}/playlists").Handler(createPlaylistHandler)
 	router.NewRoute().Path("/charts/{year}").Handler(scrapeChartsHandler)
 	router.NewRoute().Path("/search").Handler(searchHandler)
 	router.NewRoute().Path("/playlists/{playlist_id}/tracks").Handler(addToPlaylistHandler)
 
-	// TODO - should probs research this CORS stuff later
 	httpHandler := cors.Default().Handler(router)
 
 	log.Fatal(http.ListenAndServe(":6584", httpHandler))
