@@ -2,6 +2,7 @@ package handlers
 
 import (
 	. "Spotify/constants"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -48,23 +49,10 @@ func (h CallbackHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	spotifyRequest.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	spotifyResponse, _ := h.HTTPClient.Do(spotifyRequest)
+	spotifyResponseBodyBytes, _ := ioutil.ReadAll(spotifyResponse.Body)
 
-	// read the response body to a variable
-	bodyBytes, _ := ioutil.ReadAll(spotifyResponse.Body)
-	bodyString := string(bodyBytes)
-	//print raw response body for debugging purposesX
-	fmt.Println("\n\n", bodyString, "\n\n")
+	var tokenResponse TokenResponse
+	json.Unmarshal(spotifyResponseBodyBytes, &tokenResponse)
 
-	println(spotifyResponse.StatusCode)
-
-	//inputBodyBytes, _ := ioutil.ReadAll(req.Body)
-	//
-	//var inputTrackData []*models.Track
-	//json.Unmarshal(inputBodyBytes, &inputTrackData)
-	//
-
-	//data, _ := json.Marshal(inputTrackData)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(bodyBytes)
-
+	http.Redirect(w, req, fmt.Sprintf("%s/createKillerPlaylist/%s", FE_BASE_URL, tokenResponse.AccessToken), http.StatusSeeOther)
 }
