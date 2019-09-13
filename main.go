@@ -1,11 +1,14 @@
 package main
 
 import (
+	. "Spotify/constants"
 	"Spotify/handlers"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func main() {
@@ -43,5 +46,6 @@ func main() {
 
 	httpHandler := cors.Default().Handler(router)
 
-	log.Fatal(http.ListenAndServe(":6584", httpHandler))
+	fmt.Printf("Running on port: %s\n", strconv.Itoa(PORT))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", strconv.Itoa(PORT)), httpHandler))
 }
