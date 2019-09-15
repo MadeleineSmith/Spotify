@@ -5,7 +5,6 @@ import (
 	"Spotify/handlers"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/rs/cors"
 	"log"
 	"net/http"
 	"strconv"
@@ -44,8 +43,18 @@ func main() {
 	router.NewRoute().Path("/search").Handler(searchHandler)
 	router.NewRoute().Path("/playlists/{playlist_id}/tracks").Handler(addToPlaylistHandler)
 
-	httpHandler := cors.Default().Handler(router)
-
 	fmt.Printf("Running on port: %s\n", strconv.Itoa(PORT))
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", strconv.Itoa(PORT)), httpHandler))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", strconv.Itoa(PORT)), CORS(router)))
+}
+
+// TODO - hmmmm, for some reason I cannot get rs/cors to work so am using this instead:
+func CORS(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// allowing all origins
+		// TODO - mebs limit this down in the future
+		w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		h.ServeHTTP(w, r)
+	})
 }

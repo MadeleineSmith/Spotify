@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-type CreatePlaylistHandler struct{
+type CreatePlaylistHandler struct {
 	HTTPClient *http.Client
 }
 
@@ -21,7 +21,7 @@ func (h CreatePlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Reques
 	spotifyAccessToken := req.Header.Get("Authorization")
 	userID := h.getUserID(spotifyAccessToken)
 
-	if err := req.ParseForm(); err != nil {}
+	req.ParseForm()
 	// TODO - error if no name is provided?
 	playlistName := req.Form.Get("name")
 
