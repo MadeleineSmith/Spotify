@@ -17,20 +17,25 @@ type CurrentUserResponse struct {
 	ID string `json:"id"`
 }
 
+type CreatePlaylistRequest struct {
+	Name string `json:"name"`
+}
+
 func (h CreatePlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	spotifyAccessToken := req.Header.Get("Authorization")
 	userID := h.getUserID(spotifyAccessToken)
 
-	req.ParseForm()
 	// TODO - error if no name is provided?
-	playlistName := req.Form.Get("name")
+	inputBodyBytes, _ := ioutil.ReadAll(req.Body)
+	var createPlaylistRequest CreatePlaylistRequest
+	json.Unmarshal(inputBodyBytes, &createPlaylistRequest)
 
 	// TODO - following feels a bit lazy
 	jsonString := fmt.Sprintf(
 		`{
   "name": "%s",
   "public": false
-}`, playlistName)
+}`, createPlaylistRequest.Name)
 
 	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("https://api.spotify.com/v1/users/%s/playlists", userID), bytes.NewBuffer([]byte(jsonString)))
 	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", spotifyAccessToken))
