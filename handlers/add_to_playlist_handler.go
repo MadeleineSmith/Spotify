@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	. "Spotify/constants"
 	"Spotify/models"
 	"bytes"
 	"encoding/json"
@@ -20,6 +19,8 @@ type SpotifyAddToPlaylistRequest struct {
 }
 
 func (h AddToPlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	spotifyAccessToken := req.Header.Get("Authorization")
+
 	vars := mux.Vars(req)
 	playlistID := vars["playlist_id"]
 
@@ -44,6 +45,6 @@ func (h AddToPlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Request
 
 	spotifyRequest, _ := http.NewRequest(http.MethodPost, spotifyRequestURL, bytes.NewBuffer(data))
 
-	spotifyRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", AUTHORIZATION_TOKEN))
+	spotifyRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", spotifyAccessToken))
 	h.HTTPClient.Do(spotifyRequest)
 }

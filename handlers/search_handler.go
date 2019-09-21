@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	. "Spotify/constants"
 	"Spotify/models"
 	"encoding/json"
 	"fmt"
@@ -25,6 +24,8 @@ type TrackItems struct {
 }
 
 func (h SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	spotifyAccessToken := req.Header.Get("Authorization")
+
 	inputBodyBytes, _ := ioutil.ReadAll(req.Body)
 
 	var inputTrackData []*models.Track
@@ -32,7 +33,7 @@ func (h SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	for _, track := range inputTrackData {
 		spotifyRequestURL := h.buildURL(track)
-		h.makeSpotifySearchRequest(spotifyRequestURL, track)
+		h.makeSpotifySearchRequest(spotifyRequestURL, track, spotifyAccessToken)
 	}
 
 	data, _ := json.Marshal(inputTrackData)
@@ -51,7 +52,7 @@ func (h SearchHandler) buildURL(track *models.Track) string {
 		"chipmunk", "chip", // ok
 		"will i am", "will.i.am", // ok
 		"lily rose cooper", "lily allen", // ok
-		)
+	)
 
 	// Official Charts corrections
 	trackReplacer := strings.NewReplacer(
@@ -88,9 +89,9 @@ func (h SearchHandler) buildURL(track *models.Track) string {
 	return baseURL.String()
 }
 
-func (h SearchHandler) makeSpotifySearchRequest(url string, track *models.Track) {
+func (h SearchHandler) makeSpotifySearchRequest(url string, track *models.Track, accessToken string) {
 	spotifyRequest, _ := http.NewRequest(http.MethodGet, url, nil)
-	spotifyRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", AUTHORIZATION_TOKEN))
+	spotifyRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken))
 
 	spotifyResponse, _ := h.HTTPClient.Do(spotifyRequest)
 
