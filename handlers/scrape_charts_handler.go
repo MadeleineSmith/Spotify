@@ -34,7 +34,7 @@ func (h ScrapeChartsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 			// feels slightly hacky... but hey
 			if title != "" && artist != "" {
 				tracks = append(tracks, models.Track{
-					TrackName: title,
+					TrackName:  title,
 					ArtistName: artist,
 				})
 			}
@@ -52,7 +52,7 @@ func (h ScrapeChartsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 
 // TODO - should probs test these two functions
 func getRandomDateString(yearString string) string {
-	year, _ :=  strconv.Atoi(yearString)
+	year, _ := strconv.Atoi(yearString)
 
 	randomDateInYear := getRandomDateInYear(year)
 
@@ -63,16 +63,23 @@ func getRandomDateString(yearString string) string {
 	return randomDateString
 }
 
-// TODO - think about future dates not being allowed + dates before 1952
 func getRandomDateInYear(year int) time.Time {
-	min := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
+	var min int64
+
+	if year == 1952 {
+		min = time.Date(year, 11, 14, 0, 0, 0, 0, time.UTC).Unix()
+	} else {
+		min = time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
+	}
+
 	max := time.Date(year, 12, 31, 23, 59, 59, 999999999, time.UTC).Unix()
 
-	delta := max - min
+	secondsBetweenDates := max - min
 
 	seed := rand.NewSource(time.Now().UnixNano())
 	seededRand := rand.New(seed)
 
-	sec := min + seededRand.Int63n(delta)
-	return time.Unix(sec, 0)
+	randomDate := min + seededRand.Int63n(secondsBetweenDates)
+
+	return time.Unix(randomDate, 0)
 }
