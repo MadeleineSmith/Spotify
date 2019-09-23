@@ -65,14 +65,22 @@ func getRandomDateString(yearString string) string {
 
 func getRandomDateInYear(year int) time.Time {
 	var min int64
+	var max int64
+
+	currentDate := time.Now()
 
 	if year == 1952 {
+		// Records start on 14/11/1952
 		min = time.Date(year, 11, 14, 0, 0, 0, 0, time.UTC).Unix()
 	} else {
 		min = time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
 	}
 
-	max := time.Date(year, 12, 31, 23, 59, 59, 999999999, time.UTC).Unix()
+	if year == currentDate.Year() {
+		max = time.Date(year, currentDate.Month(), currentDate.Day(), 23, 59, 59, 999999999, time.UTC).Unix()
+	} else {
+		max = time.Date(year, 12, 31, 23, 59, 59, 999999999, time.UTC).Unix()
+	}
 
 	secondsBetweenDates := max - min
 
@@ -81,5 +89,7 @@ func getRandomDateInYear(year int) time.Time {
 
 	randomDate := min + seededRand.Int63n(secondsBetweenDates)
 
-	return time.Unix(randomDate, 0)
+	// using UTC to prevent overlapping to subsequent days due to differing time zones
+	// found to be necessary when year == currentDate.Year()
+	return time.Unix(randomDate, 0).UTC()
 }
