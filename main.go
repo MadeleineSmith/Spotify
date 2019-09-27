@@ -1,13 +1,12 @@
 package main
 
 import (
-	. "Spotify/constants"
 	"Spotify/handlers"
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"strconv"
+	"os"
 )
 
 func main() {
@@ -43,8 +42,9 @@ func main() {
 	router.NewRoute().Path("/search").Handler(searchHandler)
 	router.NewRoute().Path("/playlists/{playlist_id}/tracks").Handler(addToPlaylistHandler)
 
-	fmt.Printf("Running on port: %s\n", strconv.Itoa(PORT))
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", strconv.Itoa(PORT)), CORS(router)))
+	port := os.Getenv("PORT")
+	fmt.Printf("Running on port %s\n", port)
+	log.Fatal(http.ListenAndServe(port, CORS(router)))
 }
 
 // TODO - hmmmm, for some reason I cannot get rs/cors to work so am using this instead:

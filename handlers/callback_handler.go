@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	. "Spotify/constants"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 )
 
@@ -15,13 +15,12 @@ type CallbackHandler struct {
 }
 
 type TokenRequestBody struct {
-	GrantType string `json:"grant_type"`
-	Code string `json:"code"`
-	RedirectURI string `json:"redirect_uri"`
-	ClientID string `json:"client_id"`
+	GrantType    string `json:"grant_type"`
+	Code         string `json:"code"`
+	RedirectURI  string `json:"redirect_uri"`
+	ClientID     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
 }
-
 
 type TokenResponse struct {
 	AccessToken  string `json:"access_token"`
@@ -41,9 +40,9 @@ func (h CallbackHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	URLdata := url.Values{}
 	URLdata.Set("grant_type", "authorization_code")
 	URLdata.Set("code", code)
-	URLdata.Set("redirect_uri", REDIRECT_URI)
-	URLdata.Set("client_id", CLIENT_ID)
-	URLdata.Set("client_secret", CLIENT_SECRET)
+	URLdata.Set("redirect_uri", os.Getenv("REDIRECT_URI"))
+	URLdata.Set("client_id", os.Getenv("CLIENT_ID"))
+	URLdata.Set("client_secret", os.Getenv("CLIENT_SECRET"))
 
 	spotifyRequest, _ := http.NewRequest(http.MethodPost, "https://accounts.spotify.com/api/token", strings.NewReader(URLdata.Encode()))
 	spotifyRequest.Header.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -54,5 +53,5 @@ func (h CallbackHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	var tokenResponse TokenResponse
 	json.Unmarshal(spotifyResponseBodyBytes, &tokenResponse)
 
-	http.Redirect(w, req, fmt.Sprintf("%s/createKillerPlaylist/%s", FE_BASE_URL, tokenResponse.AccessToken), http.StatusSeeOther)
+	http.Redirect(w, req, fmt.Sprintf("%s/createKillerPlaylist/%s", os.Getenv("FE_BASE_URL"), tokenResponse.AccessToken), http.StatusSeeOther)
 }

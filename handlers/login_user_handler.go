@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	. "Spotify/constants"
 	"net/http"
 	"net/url"
+	"os"
 )
 
 type LoginUserHandler struct {
@@ -16,9 +16,9 @@ func (h LoginUserHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	params := url.Values{}
 	params.Add("response_type", "code")
-	params.Add("client_id", CLIENT_ID)
+	params.Add("client_id", os.Getenv("CLIENT_ID"))
 	params.Add("scope", scopes)
-	params.Add("redirect_uri", REDIRECT_URI)
+	params.Add("redirect_uri", os.Getenv("REDIRECT_URI"))
 	// TODO - add `state` query param
 
 	authorizeUrl.RawQuery = params.Encode()

@@ -1,3 +1,6 @@
-• Have it so that the date you pick covers the extremities
+✓ Have it so that the date you pick covers the extremities
+• Stop being able to directly go to path /createKillerPlaylist
 • Change up playlist name
 • Get a linter up and going on the FE
+• Have shuffle icon for the year
+• Get BE running on Elastic Beanstalk - https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/go-getstarted.html
