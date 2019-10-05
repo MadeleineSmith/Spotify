@@ -4,3 +4,7 @@
 • Get a linter up and going on the FE
 • Have shuffle icon for the year
 • Get BE running on Elastic Beanstalk - https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/go-getstarted.html
+    • This guide: https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/GettingStarted.Explore.html?shortFooter=true
+    • Then this guide: https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/go-tutorial.html?shortFooter=true
+    • Trying this: https://ctoasaservice.org/2019/06/12/creating-a-golang-based-slackbot-on-aws/
+    • Uploading just the binary - https://medium.com/@_samkitjain/how-to-deploy-go-web-application-on-aws-elastic-beanstalk-81e67c69dfa1

@@ -43,8 +43,12 @@ func main() {
 	router.NewRoute().Path("/playlists/{playlist_id}/tracks").Handler(addToPlaylistHandler)
 
 	port := os.Getenv("PORT")
+	if port == "" {
+		port = "5000"
+	}
+
 	fmt.Printf("Running on port %s\n", port)
-	log.Fatal(http.ListenAndServe(port, CORS(router)))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), CORS(router)))
 }
 
 // TODO - hmmmm, for some reason I cannot get rs/cors to work so am using this instead:
