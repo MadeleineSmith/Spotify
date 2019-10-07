@@ -1,7 +1,9 @@
 .idea/
 constants/
 local.env
+staging.env
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+Spotify
