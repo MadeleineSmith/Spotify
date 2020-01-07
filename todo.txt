@@ -9,3 +9,8 @@
     • Trying this: https://ctoasaservice.org/2019/06/12/creating-a-golang-based-slackbot-on-aws/
     • Uploading just the binary - https://medium.com/@_samkitjain/how-to-deploy-go-web-application-on-aws-elastic-beanstalk-81e67c69dfa1
     • This one works! - https://medium.com/@ddymko/deploying-docker-go-to-aws-beanstalk-e91207fe21d6
+• Get VS code running remotely - https://dev.to/babak/how-to-run-vs-code-on-the-server-3c7h
+        - https://www.youtube.com/watch?v=9Emn2YQNDl0
+
+Currently doing:
+- Get all the endpoints working (and save) in Postman

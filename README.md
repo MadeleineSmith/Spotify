@@ -1,4 +1,4 @@
-## Spotify 
+# Spotify BE 
 
 #### Running locally:
 1) Fill in env vars in `example.env`

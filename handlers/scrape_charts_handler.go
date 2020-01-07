@@ -4,12 +4,13 @@ import (
 	"Spotify/models"
 	"encoding/json"
 	"fmt"
-	"github.com/gocolly/colly"
-	"github.com/gorilla/mux"
 	"math/rand"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gocolly/colly"
+	"github.com/gorilla/mux"
 )
 
 type ScrapeChartsHandler struct {
@@ -22,7 +23,10 @@ func (h ScrapeChartsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 
 	randomDateString := getRandomDateString(year)
 
-	tracks := []models.Track{}
+	chart := models.Chart{}
+	chart.Date = randomDateString
+
+	chart.Tracks = []models.Track{}
 
 	c := colly.NewCollector()
 
@@ -33,7 +37,7 @@ func (h ScrapeChartsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 
 			// feels slightly hacky... but hey
 			if title != "" && artist != "" {
-				tracks = append(tracks, models.Track{
+				chart.Tracks = append(chart.Tracks, models.Track{
 					TrackName:  title,
 					ArtistName: artist,
 				})
@@ -45,7 +49,8 @@ func (h ScrapeChartsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 
 	c.Visit(officialChartsURL)
 
-	data, _ := json.Marshal(tracks)
+	data, _ := json.Marshal(chart)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)
 }
