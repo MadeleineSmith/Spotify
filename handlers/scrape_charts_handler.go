@@ -15,12 +15,10 @@ type ScrapeChartsHandler struct {
 
 func (h ScrapeChartsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	year := vars["year"]
-
-	randomDateString := getRandomDateString(year)
+	dateString := vars["date"]
 
 	chart := models.Chart{}
-	chart.Date = randomDateString
+	chart.Date = dateString
 
 	chart.Tracks = []models.Track{}
 
@@ -41,7 +39,7 @@ func (h ScrapeChartsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		})
 	})
 
-	officialChartsURL := fmt.Sprintf("https://www.officialcharts.com/charts/singles-chart/%s/7501/", randomDateString)
+	officialChartsURL := fmt.Sprintf("https://www.officialcharts.com/charts/singles-chart/%s/7501/", dateString)
 
 	c.Visit(officialChartsURL)
 

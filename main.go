@@ -38,7 +38,7 @@ func main() {
 	router.NewRoute().Path("/callback").Handler(callbackHandler)
 
 	router.NewRoute().Path("/user/playlists").Handler(createPlaylistHandler)
-	router.NewRoute().Path("/charts/{year}").Handler(scrapeChartsHandler)
+	router.NewRoute().Path("/charts/{date}").Handler(scrapeChartsHandler)
 	router.NewRoute().Path("/search").Handler(searchHandler)
 	router.NewRoute().Path("/playlists/{playlist_id}/tracks").Handler(addToPlaylistHandler)
 
