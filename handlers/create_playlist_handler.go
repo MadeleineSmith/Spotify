@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 type CreatePlaylistHandler struct {
@@ -18,24 +19,30 @@ type CurrentUserResponse struct {
 }
 
 type CreatePlaylistRequest struct {
-	Name string `json:"name"`
+	Date string `json:"date"`
 }
 
 func (h CreatePlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	spotifyAccessToken := req.Header.Get("Authorization")
 	userID := h.getUserID(spotifyAccessToken)
 
-	// TODO - error if no name is provided?
 	inputBodyBytes, _ := ioutil.ReadAll(req.Body)
 	var createPlaylistRequest CreatePlaylistRequest
 	json.Unmarshal(inputBodyBytes, &createPlaylistRequest)
+
+	// might be a good idea to write a custom unmarshal function for the time type but cba
+	layout := "20060102"
+	incomingTime, _ := time.Parse(layout, createPlaylistRequest.Date)
+
+	layoutUS := "January 2 2006"
+	playlistName := fmt.Sprintf("%s Chart", incomingTime.Format(layoutUS))
 
 	// TODO - following feels a bit lazy
 	jsonString := fmt.Sprintf(
 		`{
   "name": "%s",
   "public": false
-}`, createPlaylistRequest.Name)
+}`, playlistName)
 
 	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("https://api.spotify.com/v1/users/%s/playlists", userID), bytes.NewBuffer([]byte(jsonString)))
 	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", spotifyAccessToken))
