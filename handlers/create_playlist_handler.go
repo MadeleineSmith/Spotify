@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -18,8 +20,9 @@ type CurrentUserResponse struct {
 	ID string `json:"id"`
 }
 
+// Add *name* in future
 type CreatePlaylistRequest struct {
-	Date string `json:"date"`
+	Year string `json:"year"`
 }
 
 func (h CreatePlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -30,12 +33,13 @@ func (h CreatePlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Reques
 	var createPlaylistRequest CreatePlaylistRequest
 	json.Unmarshal(inputBodyBytes, &createPlaylistRequest)
 
-	// might be a good idea to write a custom unmarshal function for the time type but cba
+	randomDateString := getRandomDateString(createPlaylistRequest.Year)
+
 	layout := "20060102"
-	incomingTime, _ := time.Parse(layout, createPlaylistRequest.Date)
+	randomDate, _ := time.Parse(layout, randomDateString)
 
 	layoutUS := "January 2 2006"
-	playlistName := fmt.Sprintf("%s Chart", incomingTime.Format(layoutUS))
+	playlistName := fmt.Sprintf("%s Chart", randomDate.Format(layoutUS))
 
 	// TODO - following feels a bit lazy
 	jsonString := fmt.Sprintf(
@@ -52,6 +56,7 @@ func (h CreatePlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Reques
 
 	playlist := new(models.Playlist)
 	json.Unmarshal(spotifyBodyBytes, &playlist)
+	playlist.Date = randomDateString
 
 	data, _ := json.Marshal(playlist)
 	w.Header().Set("Content-Type", "application/json")
@@ -70,4 +75,48 @@ func (h CreatePlaylistHandler) getUserID(spotifyAccessToken string) string {
 	json.Unmarshal(spotifyResponseBodyBytes, &currentUser)
 
 	return currentUser.ID
+}
+
+// TODO - should probs test these two functions
+func getRandomDateString(yearString string) string {
+	year, _ := strconv.Atoi(yearString)
+
+	randomDateInYear := getRandomDateInYear(year)
+
+	paddedMonth := fmt.Sprintf("%02d", randomDateInYear.Month())
+	paddedDay := fmt.Sprintf("%02d", randomDateInYear.Day())
+	randomDateString := fmt.Sprintf("%s%s%s", yearString, paddedMonth, paddedDay)
+
+	return randomDateString
+}
+
+func getRandomDateInYear(year int) time.Time {
+	var min int64
+	var max int64
+
+	currentDate := time.Now()
+
+	if year == 1952 {
+		// Records start on 14/11/1952
+		min = time.Date(year, 11, 14, 0, 0, 0, 0, time.UTC).Unix()
+	} else {
+		min = time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
+	}
+
+	if year == currentDate.Year() {
+		max = time.Date(year, currentDate.Month(), currentDate.Day(), 23, 59, 59, 999999999, time.UTC).Unix()
+	} else {
+		max = time.Date(year, 12, 31, 23, 59, 59, 999999999, time.UTC).Unix()
+	}
+
+	secondsBetweenDates := max - min
+
+	seed := rand.NewSource(time.Now().UnixNano())
+	seededRand := rand.New(seed)
+
+	randomDate := min + seededRand.Int63n(secondsBetweenDates)
+
+	// using UTC to prevent overlapping to subsequent days due to differing time zones
+	// found to be necessary when year == currentDate.Year()
+	return time.Unix(randomDate, 0).UTC()
 }

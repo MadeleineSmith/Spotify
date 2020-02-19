@@ -12,5 +12,7 @@
 • Get VS code running remotely - https://dev.to/babak/how-to-run-vs-code-on-the-server-3c7h
         - https://www.youtube.com/watch?v=9Emn2YQNDl0
 
+• Set a default for the year picker - 2009, say
+
 Currently doing:
 - Get all the endpoints working (and save) in Postman
