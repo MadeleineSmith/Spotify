@@ -25,11 +25,11 @@ func (h AddToPlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Request
 	playlistID := vars["playlist_id"]
 
 	inputBodyBytes, _ := ioutil.ReadAll(req.Body)
-	var inputTrackData []*models.Track
-	json.Unmarshal(inputBodyBytes, &inputTrackData)
+	var inputChartData models.Chart
+	json.Unmarshal(inputBodyBytes, &inputChartData)
 
 	var spotifyURIs []string
-	for _, track := range inputTrackData {
+	for _, track := range inputChartData.Tracks {
 		if track.URI != "" {
 			spotifyURIs = append(spotifyURIs, track.URI)
 		}

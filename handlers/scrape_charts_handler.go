@@ -20,7 +20,7 @@ func (h ScrapeChartsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	chart := models.Chart{}
 	chart.Date = dateString
 
-	chart.Tracks = []models.Track{}
+	chart.Tracks = []*models.Track{}
 
 	c := colly.NewCollector()
 
@@ -31,7 +31,7 @@ func (h ScrapeChartsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 
 			// feels slightly hacky... but hey
 			if title != "" && artist != "" {
-				chart.Tracks = append(chart.Tracks, models.Track{
+				chart.Tracks = append(chart.Tracks, &models.Track{
 					TrackName:  title,
 					ArtistName: artist,
 				})

@@ -28,15 +28,18 @@ func (h SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	inputBodyBytes, _ := ioutil.ReadAll(req.Body)
 
-	var inputTrackData []*models.Track
-	json.Unmarshal(inputBodyBytes, &inputTrackData)
+	var chart models.Chart
 
-	for _, track := range inputTrackData {
+	//var inputTrackData []*models.Track
+	json.Unmarshal(inputBodyBytes, &chart)
+
+	for _, track := range chart.Tracks {
 		spotifyRequestURL := h.buildURL(track)
 		h.makeSpotifySearchRequest(spotifyRequestURL, track, spotifyAccessToken)
 	}
 
-	data, _ := json.Marshal(inputTrackData)
+	// TODO - for some reason not adding the URI
+	data, _ := json.Marshal(chart)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)
 }

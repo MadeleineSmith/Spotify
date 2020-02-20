@@ -22,7 +22,7 @@ type CurrentUserResponse struct {
 
 // Add *name* in future
 type CreatePlaylistRequest struct {
-	Year string `json:"year"`
+	Year int `json:"year"`
 }
 
 func (h CreatePlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -78,14 +78,12 @@ func (h CreatePlaylistHandler) getUserID(spotifyAccessToken string) string {
 }
 
 // TODO - should probs test these two functions
-func getRandomDateString(yearString string) string {
-	year, _ := strconv.Atoi(yearString)
-
+func getRandomDateString(year int) string {
 	randomDateInYear := getRandomDateInYear(year)
 
 	paddedMonth := fmt.Sprintf("%02d", randomDateInYear.Month())
 	paddedDay := fmt.Sprintf("%02d", randomDateInYear.Day())
-	randomDateString := fmt.Sprintf("%s%s%s", yearString, paddedMonth, paddedDay)
+	randomDateString := fmt.Sprintf("%s%s%s", strconv.Itoa(year), paddedMonth, paddedDay)
 
 	return randomDateString
 }
