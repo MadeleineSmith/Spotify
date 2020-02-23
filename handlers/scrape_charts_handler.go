@@ -7,6 +7,7 @@ import (
 	"github.com/gocolly/colly"
 	"github.com/gorilla/mux"
 	"net/http"
+	"time"
 )
 
 type ScrapeChartsHandler struct {
@@ -39,7 +40,11 @@ func (h ScrapeChartsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		})
 	})
 
-	officialChartsURL := fmt.Sprintf("https://www.officialcharts.com/charts/singles-chart/%s/7501/", dateString)
+	layout := "2006-01-02"
+	timeStamp, _ := time.Parse(layout, dateString)
+	formattedDateString := timeStamp.Format("20060102")
+
+	officialChartsURL := fmt.Sprintf("https://www.officialcharts.com/charts/singles-chart/%s/7501/", formattedDateString)
 
 	c.Visit(officialChartsURL)
 
