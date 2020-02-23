@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
-	"strconv"
+	"strings"
 	"time"
 )
 
@@ -22,10 +22,35 @@ type CurrentUserResponse struct {
 
 // Add *name* in future
 type CreatePlaylistRequest struct {
-	Year int `json:"year"`
+	Year         *int        `json:"year"`
+	SpecificDate *customDate `json:"date"`
 }
 
+type customDate struct {
+	time.Time
+}
+
+func (sd *customDate) UnmarshalJSON(input []byte) error {
+	strInput := string(input)
+	strInput = strings.Trim(strInput, `"`)
+	newTime, err := time.Parse("2006-01-02", strInput)
+	if err != nil {
+		return err
+	}
+
+	sd.Time = newTime
+	return nil
+}
+
+// need to verify on the dates coming in that not before or after Official Charts range
 func (h CreatePlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case http.MethodPost:
+		h.handlePost(w, req)
+	}
+}
+
+func (h CreatePlaylistHandler) handlePost(w http.ResponseWriter, req *http.Request) {
 	spotifyAccessToken := req.Header.Get("Authorization")
 	userID := h.getUserID(spotifyAccessToken)
 
@@ -33,13 +58,18 @@ func (h CreatePlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Reques
 	var createPlaylistRequest CreatePlaylistRequest
 	json.Unmarshal(inputBodyBytes, &createPlaylistRequest)
 
-	randomDateString := getRandomDateString(createPlaylistRequest.Year)
+	var playlistName string
+	var playlistDate time.Time
 
-	layout := "20060102"
-	randomDate, _ := time.Parse(layout, randomDateString)
+	// if only year provided
+	if createPlaylistRequest.SpecificDate == nil {
+		playlistDate = getRandomDate(*createPlaylistRequest.Year)
+	} else {
+		playlistDate = createPlaylistRequest.SpecificDate.Time
+	}
 
 	layoutUS := "January 2 2006"
-	playlistName := fmt.Sprintf("%s Chart", randomDate.Format(layoutUS))
+	playlistName = fmt.Sprintf("%s Chart", playlistDate.Format(layoutUS))
 
 	// TODO - following feels a bit lazy
 	jsonString := fmt.Sprintf(
@@ -56,7 +86,7 @@ func (h CreatePlaylistHandler) ServeHTTP(w http.ResponseWriter, req *http.Reques
 
 	playlist := new(models.Playlist)
 	json.Unmarshal(spotifyBodyBytes, &playlist)
-	playlist.Date = randomDateString
+	playlist.Date = playlistDate.Format("2006-01-02")
 
 	data, _ := json.Marshal(playlist)
 	w.Header().Set("Content-Type", "application/json")
@@ -78,14 +108,10 @@ func (h CreatePlaylistHandler) getUserID(spotifyAccessToken string) string {
 }
 
 // TODO - should probs test these two functions
-func getRandomDateString(year int) string {
-	randomDateInYear := getRandomDateInYear(year)
+func getRandomDate(year int) time.Time {
+	randomDate := getRandomDateInYear(year)
 
-	paddedMonth := fmt.Sprintf("%02d", randomDateInYear.Month())
-	paddedDay := fmt.Sprintf("%02d", randomDateInYear.Day())
-	randomDateString := fmt.Sprintf("%s%s%s", strconv.Itoa(year), paddedMonth, paddedDay)
-
-	return randomDateString
+	return randomDate
 }
 
 func getRandomDateInYear(year int) time.Time {
