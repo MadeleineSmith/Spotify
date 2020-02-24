@@ -68,8 +68,8 @@ func (h CreatePlaylistHandler) handlePost(w http.ResponseWriter, req *http.Reque
 		playlistDate = createPlaylistRequest.SpecificDate.Time
 	}
 
-	layoutUS := "January 2 2006"
-	playlistName = fmt.Sprintf("%s Chart", playlistDate.Format(layoutUS))
+	layoutUK := "2 January 2006"
+	playlistName = fmt.Sprintf("%s Chart", playlistDate.Format(layoutUK))
 
 	// TODO - following feels a bit lazy
 	jsonString := fmt.Sprintf(
