@@ -22,7 +22,7 @@ type CurrentUserResponse struct {
 
 // Add *name* in future
 type CreatePlaylistRequest struct {
-	Year         *int        `json:"year"`
+	MinimumYear  *int        `json:"minYear"`
 	SpecificDate *customDate `json:"date"`
 }
 
@@ -62,9 +62,9 @@ func (h CreatePlaylistHandler) handlePost(w http.ResponseWriter, req *http.Reque
 	var playlistDate time.Time
 
 	// if only year provided
-	if createPlaylistRequest.SpecificDate == nil {
-		playlistDate = getRandomDate(*createPlaylistRequest.Year)
-	} else {
+	if createPlaylistRequest.MinimumYear != nil {
+		playlistDate = getRandomDate(*createPlaylistRequest.MinimumYear)
+	} else if createPlaylistRequest.SpecificDate != nil {
 		playlistDate = createPlaylistRequest.SpecificDate.Time
 	}
 
@@ -107,30 +107,25 @@ func (h CreatePlaylistHandler) getUserID(spotifyAccessToken string) string {
 	return currentUser.ID
 }
 
-// TODO - should probs test these two functions
-func getRandomDate(year int) time.Time {
-	randomDate := getRandomDateInYear(year)
-
-	return randomDate
-}
-
-func getRandomDateInYear(year int) time.Time {
+// should probs unit test...
+func getRandomDate(minimumYear int) time.Time {
 	var min int64
 	var max int64
 
 	currentDate := time.Now()
+	currentYear := currentDate.Year()
 
-	if year == 1952 {
+	if minimumYear == 1952 {
 		// Records start on 14/11/1952
-		min = time.Date(year, 11, 14, 0, 0, 0, 0, time.UTC).Unix()
+		min = time.Date(minimumYear, 11, 14, 0, 0, 0, 0, time.UTC).Unix()
 	} else {
-		min = time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
+		min = time.Date(minimumYear, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
 	}
 
-	if year == currentDate.Year() {
-		max = time.Date(year, currentDate.Month(), currentDate.Day(), 23, 59, 59, 999999999, time.UTC).Unix()
+	if minimumYear == currentYear {
+		max = time.Date(currentYear, currentDate.Month(), currentDate.Day(), 23, 59, 59, 999999999, time.UTC).Unix()
 	} else {
-		max = time.Date(year, 12, 31, 23, 59, 59, 999999999, time.UTC).Unix()
+		max = time.Date(currentYear, 12, 31, 23, 59, 59, 999999999, time.UTC).Unix()
 	}
 
 	secondsBetweenDates := max - min
