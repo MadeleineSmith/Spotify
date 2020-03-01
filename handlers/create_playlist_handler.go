@@ -62,9 +62,9 @@ func (h CreatePlaylistHandler) handlePost(w http.ResponseWriter, req *http.Reque
 	var playlistDate time.Time
 
 	// if only year provided
-	if createPlaylistRequest.MinimumYear != nil {
+	if createPlaylistRequest.MinimumYear != nil && createPlaylistRequest.SpecificDate == nil {
 		playlistDate = getRandomDate(*createPlaylistRequest.MinimumYear)
-	} else if createPlaylistRequest.SpecificDate != nil {
+	} else if createPlaylistRequest.SpecificDate != nil && createPlaylistRequest.MinimumYear == nil {
 		playlistDate = createPlaylistRequest.SpecificDate.Time
 	}
 
