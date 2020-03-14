@@ -1,1 +1,1 @@
-web: bin/Spotify-BE
+web: Spotify-BE
