@@ -1,1 +1,1 @@
-web: "./spotify"
+web: "./bin/spotify"
