@@ -1,1 +1,1 @@
-web: bin/spotify
+web: bin/Spotify
