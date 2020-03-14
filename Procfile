@@ -1,1 +1,1 @@
-web: Spotify-BE
+web: main
