@@ -6,12 +6,14 @@
 
 #### Deploying to AWS:
 1) Commit your work
-2) Run `eb deploy`
+2) Run `git push staging master` to push to staging
+3) Run `git push prod master` to push to production
 
 * Staging URL is:
 ```
-http://spotify-staging.2ryi2nghev.eu-west-1.elasticbeanstalk.com/
+https://spotify-be-stage.herokuapp.com/
 ```
 * Production URL is:
 ```
+https://spotify-be-prod.herokuapp.com/
 ```

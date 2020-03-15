@@ -53,5 +53,5 @@ func (h CallbackHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	var tokenResponse TokenResponse
 	json.Unmarshal(spotifyResponseBodyBytes, &tokenResponse)
 
-	http.Redirect(w, req, fmt.Sprintf("%s/createKillerPlaylist/%s", os.Getenv("FE_BASE_URL"), tokenResponse.AccessToken), http.StatusSeeOther)
+	http.Redirect(w, req, fmt.Sprintf("%s/createPlaylist/%s", os.Getenv("FE_BASE_URL"), tokenResponse.AccessToken), http.StatusSeeOther)
 }
