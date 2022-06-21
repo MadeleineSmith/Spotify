@@ -1,5 +1,7 @@
 # Spotify BE 
 
+https://user-images.githubusercontent.com/16705876/174805991-e0412e1c-d023-4034-becf-04c12207a67d.mp4
+
 #### Running locally:
 1) Fill in env vars in `example.env`
 2) Run in IDE
